@@ -22,18 +22,20 @@ class Video(models.Model):
     file = models.FileField(upload_to=upload_file_path, validators=[FileExtensionValidator(allowed_extensions=['mp4'])])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    views = models.IntegerField()
+    views = models.IntegerField(default=0)
     
 class TimeStamp(models.Model):
+    aroma_choices = [('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')]
+    
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
-    aroma_id = models.IntegerField()
+    aroma = models.CharField(max_length=1, choices=aroma_choices)
     moment = models.IntegerField()
     
 class ChangeRequest(models.Model):
-    FIELD_CHOICES = [('password', 'password')]
+    field_choices = [('password', 'password')]
     
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='recovery_records')
-    field = models.CharField(max_length=100, choices=FIELD_CHOICES)
+    field = models.CharField(max_length=100, choices=field_choices)
     new_value = models.TextField()
     confirm_code = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)

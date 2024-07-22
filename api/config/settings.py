@@ -13,6 +13,7 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'aromastream',
+    'drf_spectacular',
     'rest_framework',
     'django.contrib.auth',
     'django.contrib.admin',
@@ -65,10 +66,17 @@ REST_FRAMEWORK = {
                         
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 15
-    
+    'PAGE_SIZE': 15,
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Your Project API',
+    'DESCRIPTION': 'Your project description',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # OTHER SETTINGS
+}
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
@@ -83,6 +91,53 @@ DATABASES = {
         "PORT": "5432",
     }
 }
+
+# settings.py
+
+# settings.py
+
+import os
+from logging.handlers import RotatingFileHandler
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '%(asctime)s - %(levelname)s - %(message)s',
+            'style': '%',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'app.log'),
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,  # Хранить 5 старых файлов
+            'formatter': 'simple',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'aromastream': {  
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
+
+ARDUINO_URL  = 'localhost:1203/{}'
 
 SIMPLE_JWT = {
     "SLIDING_TOKEN_LIFETIME": timedelta(days=30),

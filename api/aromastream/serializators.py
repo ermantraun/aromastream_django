@@ -9,25 +9,12 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = USER_MODEL
-        fields = '__all__'
         extra_kwargs = {'password': {'write_only': True}}
         exclude = ['id', 'groups', 'user_permissions', 'is_staff', 'is_active', 'is_superuser', 'last_login', 'date_joined']
     def create(self, validated_data):
         user = USER_MODEL.objects.create_user(**validated_data)
         
         return user
-    
-    def validate_email(self, value):
-        if USER_MODEL.objects.filter(email=value).exists():
-            raise serializers.ValidationError('Email already exists.')
-        
-        return value
-    
-    def validate_username(self, value):
-        if USER_MODEL.objects.filter(username=value).exists():
-            raise serializers.ValidationError('Username already exists.')
-        
-        return value
     
     def validate(self, data):
         required_partial_fields = self.context.get('required_partial_fields', [])
