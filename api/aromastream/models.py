@@ -29,7 +29,7 @@ class TimeStamp(models.Model):
     
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
     aroma = models.CharField(max_length=1, choices=aroma_choices)
-    moment = models.IntegerField()
+    moment = models.PositiveIntegerField()
     
 class ChangeRequest(models.Model):
     field_choices = [('password', 'password')]

@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from datetime import timedelta
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -21,7 +22,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sessions',
+    'drf_api_logger',
+    
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -31,9 +35,14 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'drf_api_logger.middleware.api_logger_middleware.APILoggerMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
+
+DRF_API_LOGGER_DATABASE = True
+DRF_LOGGER_QUEUE_MAX_SIZE = 50
+DRF_API_LOGGER_EXCLUDE_KEYS = ['password', 'token']
 
 TEMPLATES = [
     {
@@ -71,14 +80,12 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Your Project API',
-    'DESCRIPTION': 'Your project description',
+    'TITLE': 'AromaStream API',
+    'DESCRIPTION': '',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
-    # OTHER SETTINGS
 }
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
+
 
 DATABASES = {
     
@@ -86,56 +93,12 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "django",
         "USER": "django",
-        "PASSWORD": "",
+        "PASSWORD": "8995",
         "HOST": "127.0.0.1",
         "PORT": "5432",
     }
 }
 
-# settings.py
-
-# settings.py
-
-import os
-from logging.handlers import RotatingFileHandler
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'simple': {
-            'format': '%(asctime)s - %(levelname)s - %(message)s',
-            'style': '%',
-        },
-    },
-    'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, 'app.log'),
-            'maxBytes': 1024 * 1024 * 5,  # 5 MB
-            'backupCount': 5,  # Хранить 5 старых файлов
-            'formatter': 'simple',
-        },
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'aromastream': {  
-            'handlers': ['file'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-    },
-}
 
 ARDUINO_URL  = 'localhost:1203/{}'
 
@@ -146,8 +109,8 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.SlidingToken',),
     'TOKEN_TYPE_CLAIM': 'sliding'
 }
-# Password validation
-# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
+
+VERIFICATION_CODE_LENGTH = 6
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -164,9 +127,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.0/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 

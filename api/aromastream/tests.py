@@ -7,7 +7,6 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 User = get_user_model()
 
-
         
 class UserTests(APITestCase):
     def setUp(self):
@@ -40,7 +39,7 @@ class UserTests(APITestCase):
     def test_update_user(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token)
         new_data = {'email': 'newemail@example.com'}
-        response = self.client.post(reverse('user'), new_data, format='json')
+        response = self.client.post(reverse('user_update'), new_data, format='json')
         self.assertEqual(response.status_code, 204)
         self.user.refresh_from_db()
         self.assertEqual(self.user.email, 'newemail@example.com')
@@ -58,14 +57,14 @@ class TimeStampTests(APITestCase):
         self.token = str(SlidingToken.for_user(self.user))
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token)
         self.video = Video.objects.create(title='test video', description='test description', views=0)
-        self.timestamp_data = {'video': self.video.id, 'aroma_id': 1, 'moment': 10}
+        self.timestamp_data = {'video': self.video.id, 'aroma': 'A', 'moment': 10}
 
     def test_create_timestamp(self):
         response = self.client.post(reverse('timestamp_create'), self.timestamp_data, format='json')
         self.assertEqual(response.status_code, 201)
 
     def test_get_timestamps(self):
-        TimeStamp.objects.create(video=self.video, aroma_id=1, moment=10)
+        TimeStamp.objects.create(video=self.video, aroma=1, moment=10)
         response = self.client.get(reverse('timestamp_list', args=[self.video.id]))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data['results']), 1)

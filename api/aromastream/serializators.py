@@ -2,8 +2,11 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Video, TimeStamp
 from django.core.validators import FileExtensionValidator
+from django.conf import settings
 
 USER_MODEL = get_user_model()
+
+
 
 class UserSerializer(serializers.ModelSerializer):
     
@@ -34,18 +37,33 @@ class UserSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         username = validated_data.get('username', None)
         email = validated_data.get('email', None)
-        password = validated_data.get('password', None)
         
         if username is not None:
             instance.username = validated_data['username']
         if email is not None:
             instance.email = validated_data['email']
-        if password is not None:
-            instance.set_password(validated_data['password'])
             
         instance.save()
         
         return instance
+    
+class UserUpdateSerializer(serializers.ModelSerializer):
+    
+    
+    class Meta:
+        model = USER_MODEL
+        exclude = UserSerializer.Meta.exclude + ['password']
+
+
+class PasswordUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = USER_MODEL
+        fields = ['password']
+
+
+class PasswordUpdateConfirmSerializer(serializers.Serializer):
+    confirm_code = serializers.CharField(max_length=settings.VERIFICATION_CODE_LENGTH)
+
 
 class TimeStampSerializer(serializers.ModelSerializer):
     class Meta:
@@ -67,3 +85,25 @@ class VideoSerializer(serializers.ModelSerializer):
         video = Video.objects.create(**validated_data)
         
         return video
+    
+class TriggerSerializer(serializers.Serializer):
+    timestamp = serializers.PrimaryKeyRelatedField(queryset=TimeStamp.objects.all())
+    
+    
+class Response400Serializer(serializers.Serializer):
+    detail = serializers.DictField(child=serializers.CharField(help_text="invalid parameter"), 
+                                   help_text="invalid parameters")
+
+
+class BasePaginateSchema(serializers.Serializer):
+        count = serializers.IntegerField()
+        next = serializers.CharField(allow_blank=True, required=False)
+        previous = serializers.CharField(allow_blank=True, required=False)
+        results = None
+
+class TimeStampPaginateSchema(BasePaginateSchema):
+    results = serializers.ListSerializer(child=TimeStampSerializer())
+    
+class VideoPaginateSchema(BasePaginateSchema):
+    results = serializers.ListSerializer(child=VideoSerializer())
+    
