@@ -9,10 +9,9 @@ RUN apt-get update && \
 RUN git clone https://github.com/SkyAdam1/aromastream_django -b dev /aromastream_django
 
 
-WORKDIR /aromastream_django/api
+WORKDIR /aromastream_django
 
 
-COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 
@@ -23,6 +22,7 @@ USER postgres
 RUN /etc/init.d/postgresql start && \
     psql --command "CREATE DATABASE django;" && \
     psql --command "CREATE USER django WITH PASSWORD '8995';" && \
+    psql --command "ALTER USER django CREATEDB;" && \
     psql --command "ALTER ROLE django SET client_encoding TO 'utf8';" && \
     psql --command "ALTER ROLE django SET default_transaction_isolation TO 'read committed';" && \
     psql --command "ALTER ROLE django SET timezone TO 'UTC';" && \
@@ -36,7 +36,11 @@ EXPOSE 5432 8000
 
 USER root
 
+WORKDIR /aromastream_django/api
+
+RUN service postgresql start && \
+    python manage.py makemigrations aromastream && \
+    python manage.py migrate
 
 CMD service postgresql start && \
-    python manage.py migrate && \
     python manage.py runserver 0.0.0.0:8000
