@@ -1,8 +1,7 @@
 from django.urls import path
-from rest_framework_simplejwt.views import (
-    TokenObtainSlidingView)
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+from rest_framework_simplejwt.views import TokenObtainSlidingView
 from . import views
-from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 
 urlpatterns = [
@@ -19,6 +18,7 @@ urlpatterns = [
     path('videos/popular/', views.PopularVideoListView.as_view(), name='popular_videos'),
     path('videos/search/', views.SearchVideoListView.as_view(), name='search_video'),
     path('arduino/trigger', views.TriggerListView.as_view(), name='trigger'),
+    path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path('schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]

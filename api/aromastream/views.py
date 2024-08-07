@@ -11,13 +11,14 @@ from django.contrib.postgres.search import SearchVector, SearchQuery
 from django.contrib.auth.models import update_last_login
 from django.conf import settings
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from .models import TimeStamp, ChangeRequest, Video
 from .serializators import (
     UserSerializer, TimeStampSerializer, VideoSerializer, 
     UserUpdateSerializer, Response400Serializer, PasswordUpdateSerializer, 
     PasswordUpdateConfirmSerializer, TimeStampPaginateSchema, VideoPaginateSchema, TriggerSerializer
 )
+
 
 def generate_verification_code(length=settings.VERIFICATION_CODE_LENGTH):
     digits = "0123456789"
@@ -27,7 +28,6 @@ def generate_verification_code(length=settings.VERIFICATION_CODE_LENGTH):
 def send_confirm_code(user, code):
     # Placeholder function to send the confirmation code to the user
     pass
-
 
 class UserCreateView(APIView):
     @extend_schema(
@@ -135,7 +135,7 @@ class TimeStampListView(APIView, PageNumberPagination):
         except ValueError:
             return Response({"detail": "Invalid video ID."}, status=status.HTTP_400_BAD_REQUEST)
 
-        timestamps = TimeStamp.objects.filter(video_id=video_id)
+        timestamps = TimeStamp.objects.filter(video_id=video_id).order_by('created_at')
         results = self.paginate_queryset(timestamps, request, view=self)
         serializer = TimeStampSerializer(results, many=True)
         return self.get_paginated_response(serializer.data)
@@ -147,9 +147,22 @@ class TimeStampCreateView(APIView):
     @extend_schema(
         request=TimeStampSerializer, 
         responses={201: None, 400: Response400Serializer},
-        description='Create a new timestamp'
+        description='Create a new timestamp',
+         examples=[
+            OpenApiExample(
+                "Valid Request Example",
+                value={
+                    "video": 1,
+                    "aroma": "A",
+                    "moment": "10:30:45"
+                }
+            )
+        ]
     )
     def post(self, request):
+        if not request.user.is_staff:
+            return Response({"detail": "Only staff members can create videos."}, status=status.HTTP_403_FORBIDDEN)
+        
         serializer = TimeStampSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -172,16 +185,21 @@ class VideoListView(APIView, PageNumberPagination):
         serializer = VideoSerializer(results, many=True)
         return self.get_paginated_response(serializer.data)
 
+    
     @extend_schema(
         request=VideoSerializer, 
         responses={201: None, 400: Response400Serializer},
         description='Create a new video'
     )
+    
     def post(self, request):
+        if not request.user.is_staff:
+            return Response({"detail": "Only staff members can create videos."}, status=status.HTTP_403_FORBIDDEN)
+        
         serializer = VideoSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

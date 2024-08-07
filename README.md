@@ -5,6 +5,7 @@
 ## Содержание
 
 - [Предварительные требования](#предварительные-требования)
+- [Создание сети проекта в докере](#Создание-сети-проекта-в-докере)
 - [Запуск проекта](#запуск-проекта)
 - [Структура проекта](#структура-проекта)
 - [Важные настройки](#важные-настройки)
@@ -17,22 +18,58 @@
 
 - <a href="https://docs.docker.com/get-docker/" target="_blank">Docker</a>
 
-## <a name="запуск-проекта"></a>Запуск проекта
+## <a name="создание-сети-проекта-в-docker"></a>Создание сети проекта в Docker
+
+
+
+Создайте сеть проекта в Docker:
+
+<pre><code>docker network create aromastream</code></pre>
+
+
+<h2>Запуск образа PostgreSQL</h2>
+<h3>0. Склонируйте репозиторий</h3>
+<h3>1. Соберите Docker-образ</h3>
+<p>Если вы еще не собрали Docker-образ, выполните следующую команду в каталог db_dockerfile и выполните:</p>
+<pre><code>docker build -t postgres .</code></pre>
+
+<h3>2. Создайте volume для хранения данных</h3>
+<p>Создайте volume для хранения данных PostgreSQL, чтобы сохранить данные между перезапусками контейнера:</p>
+<pre><code>docker volume create postgres_data</code></pre>
+
+<h3>3. Запуск контейнера</h3>
+<p>Вы можете запустить контейнер PostgreSQL без использования переменных окружения. Этот метод использует стандартные настройки PostgreSQL, указанные в Dockerfile:</p>
+<pre><code>docker run -d \
+  --name psg \
+  -p 5432:5432 \
+  -v postgres_data:/var/lib/postgresql/data \
+  --network aromastream \
+  postgres</code></pre>
+<ul>
+    <li><code>-d</code>: Запускает контейнер в фоновом режиме.</li>
+    <li><code>--name my_postgres_container</code>: Задает имя контейнера.</li>
+    <li><code>-p 5432:5432</code>: Пробрасывает порт 5432 контейнера на порт 5432 хоста.</li>
+    <li><code>-v postgres_data:/var/lib/postgresql/data</code>: Подключает постоянное хранилище для данных PostgreSQL.</li>
+</ul>
+
+## <a name="запуск-проекта"></a> Запуск проекта 
+    
 
 <ol>
-    <li><b>Клонируйте репозиторий:</b>
-    <pre><code>git clone https://github.com/SkyAdam1/aromastream_django -b dev
-cd aromastream_django/api</code></pre>
-    </li>
     <li><b>Создайте Docker-образ и запустите контейнер:</b>
     <pre><code>docker build -t aromastream_django .
-docker run -p 8000:8000 -p 5432:5432 aromastream_django</code></pre>
-    Это запустит контейнер с вашим приложением и PostgreSQL базой данных. Порт 8000 будет использоваться для веб-сервиса Django, а порт 5432 для PostgreSQL.
+docker  run -it --name django -p 80:80 --network aromastream aromastream_django</code></pre>
+   
+   Это запустит контейнер с вашим приложением. Порт 8000 будет использоваться для веб-сервиса Django
     </li>
-    <li><b>Откройте веб-приложение:</b>
-    Откройте браузер и перейдите по адресу <a href="http://localhost:8000">http://localhost:8000</a>, чтобы увидеть веб-приложение в действии.
+    <li><b>Запустите веб-приложение:</b>
+    <pre><code>python manage.py migrate</code></pre>
+    <pre><code>python manage.py runserver 0.0.0.0:80</code></pre>
     </li>
 </ol>
+
+
+
 
 ## <a name="структура-проекта"></a>Структура проекта
 
