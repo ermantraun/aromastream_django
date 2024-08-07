@@ -19,20 +19,6 @@ class UserSerializer(serializers.ModelSerializer):
         
         return user
     
-    def validate(self, data):
-        required_partial_fields = self.context.get('required_partial_fields', [])
-        
-        if required_partial_fields:
-            fields = set(data.keys())
-            required_partial_fields = set(required_partial_fields)
-            
-            if not(required_partial_fields <= fields):
-                error_detail = {}
-                for field in (required_partial_fields - fields ):
-                    error_detail[field] = 'field is required'
-                raise serializers.ValidationError({'detail': error_detail})
-            
-        return data
     
     def update(self, instance, validated_data):
         username = validated_data.get('username', None)
@@ -68,7 +54,9 @@ class PasswordUpdateConfirmSerializer(serializers.Serializer):
 class TimeStampSerializer(serializers.ModelSerializer):
     class Meta:
         model = TimeStamp
-        exclude = ['id']
+        exclude = ['id', 'created_at']
+        
+    
     def create(self, validated_data):
         timestamp = TimeStamp.objects.create(**validated_data)
         
@@ -80,7 +68,7 @@ class VideoSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Video
-        extra_kwargs = {'file': {'validators': [FileExtensionValidator(allowed_extensions=['mp4'])]}}
+        extra_kwargs = {'file': {'validators': [FileExtensionValidator(allowed_extensions=['mp4'])]}, 'views': {'read_only': True}}
         exclude = ['id', 'created_at', 'updated_at']
     def create(self, validated_data):
         video = Video.objects.create(**validated_data)

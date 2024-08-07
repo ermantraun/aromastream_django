@@ -4,10 +4,10 @@ from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import SlidingToken
 from .models import Video, TimeStamp
 from django.core.files.uploadedfile import SimpleUploadedFile
-
+from unittest.mock import patch
+from .models import ChangeRequest
 User = get_user_model()
 
-        
 class UserTests(APITestCase):
     def setUp(self):
         self.client = APIClient()
@@ -20,15 +20,14 @@ class UserTests(APITestCase):
         self.token = str(SlidingToken.for_user(self.user))
 
     def test_create_user(self):
-
         response = self.client.post(reverse('signup'), {
             'username': 'testuser123',
             'email': 'testemail12@example.com',
             'password': 'testpassword123'
         }, format='json')
-        
         self.assertEqual(response.status_code, 201)
         self.assertIn('token', response.data)
+        self.assertTrue(User.objects.filter(username='testuser123').exists())
 
     def test_get_user(self):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token)
@@ -44,11 +43,47 @@ class UserTests(APITestCase):
         self.user.refresh_from_db()
         self.assertEqual(self.user.email, 'newemail@example.com')
 
-    def test_update_password(self):
+    @patch('aromastream.views.send_confirm_code')  
+    def test_update_password(self, mock_send_confirm_code):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token)
         password_data = {'password': 'newpassword123'}
+
         response = self.client.post(reverse('password_reset'), password_data, format='json')
         self.assertEqual(response.status_code, 204)
+
+        change_request = ChangeRequest.objects.filter(user=self.user, field='password').exists()
+        self.assertTrue(change_request)
+
+        mock_send_confirm_code.assert_called_once()
+
+    def test_update_password_confirmation(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token)
+        new_password = 'newpassword123'
+        self.client.post(reverse('password_reset'), {'password': new_password}, format='json')
+
+        confirmation_code = ChangeRequest.objects.get(user=self.user, field='password').confirm_code
+
+        response = self.client.post(reverse('password_reset_confirm'), {'confirm_code': confirmation_code}, format='json')
+        self.assertEqual(response.status_code, 204)
+
+        response = self.client.post(reverse('login'), {
+            'username': self.user.username,
+            'password': new_password
+        }, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('token', response.data)
+        
+
+
+from rest_framework.test import APIClient, APITestCase
+from django.urls import reverse
+from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.tokens import SlidingToken
+from .models import Video, TimeStamp
+from django.core.files.uploadedfile import SimpleUploadedFile
+from unittest.mock import patch
+from .models import ChangeRequest
+User = get_user_model()
 
 class TimeStampTests(APITestCase):
     def setUp(self):
@@ -57,17 +92,22 @@ class TimeStampTests(APITestCase):
         self.token = str(SlidingToken.for_user(self.user))
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token)
         self.video = Video.objects.create(title='test video', description='test description', views=0)
-        self.timestamp_data = {'video': self.video.id, 'aroma': 'A', 'moment': 10}
+        self.timestamp_data = {'video': self.video.id, 'aroma': 'A', 'moment': '12:34:56'}
 
     def test_create_timestamp(self):
         response = self.client.post(reverse('timestamp_create'), self.timestamp_data, format='json')
         self.assertEqual(response.status_code, 201)
 
+        self.assertTrue(TimeStamp.objects.filter(video=self.video, aroma='A', moment='12:34:56').exists())
+
     def test_get_timestamps(self):
-        TimeStamp.objects.create(video=self.video, aroma=1, moment=10)
+        TimeStamp.objects.create(video=self.video, aroma='A', moment='12:34:56')
         response = self.client.get(reverse('timestamp_list', args=[self.video.id]))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data['results']), 1)
+        self.assertEqual(response.data['results'][0]['aroma'], 'A')
+        self.assertEqual(response.data['results'][0]['moment'], '12:34:56')
+
 
 class VideoTests(APITestCase):
     def setUp(self):
@@ -85,11 +125,13 @@ class VideoTests(APITestCase):
     def test_create_video(self):
         response = self.client.post(reverse('videos'), self.video_data, format='multipart')
         self.assertEqual(response.status_code, 201)
+        self.assertTrue(Video.objects.filter(title='test video').exists())
 
     def test_get_videos(self):
         response = self.client.get(reverse('videos'))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data['results']), 1)
+        self.assertEqual(response.data['results'][0]['title'], 'test video')
 
     def test_get_video_detail(self):
         response = self.client.get(reverse('video_detail', args=[self.video.id]))
@@ -110,3 +152,9 @@ class SearchVideoTests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data['results']), 1)
         self.assertEqual(response.data['results'][0]['title'], 'searchable video')
+
+    def test_search_videos_no_results(self):
+        response = self.client.get(reverse('search_video'), {'query': 'nonexistent'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['results']), 0)
+

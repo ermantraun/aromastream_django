@@ -14,8 +14,7 @@ def upload_file_path(instance, file_name):
     name = uuid4().hex
     file_path = '{}/{}/{}/{}.{}'.format(year, month, day, name, ext)
     return file_path
-
-    
+ 
 class Video(models.Model):
     title = models.CharField(max_length=400)
     description = models.TextField()
@@ -26,14 +25,13 @@ class Video(models.Model):
     
 class TimeStamp(models.Model):
     aroma_choices = [('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')]
-    
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
     aroma = models.CharField(max_length=1, choices=aroma_choices)
-    moment = models.PositiveIntegerField()
-    
+    moment = models.TimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
 class ChangeRequest(models.Model):
     field_choices = [('password', 'password')]
-    
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='recovery_records')
     field = models.CharField(max_length=100, choices=field_choices)
     new_value = models.TextField()

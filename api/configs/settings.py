@@ -1,16 +1,12 @@
-
-
 from pathlib import Path
 from datetime import timedelta
-import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
 SECRET_KEY = 'django-insecure-)9ge$#hvbp9drp+m@jr5kdjxkiw@i0f1@wh(w)p^qj-c929s$-'
-
 DEBUG = True
-
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'aromastream',
@@ -23,9 +19,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sessions',
     'drf_api_logger',
-    
 ]
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -38,7 +32,7 @@ MIDDLEWARE = [
     'drf_api_logger.middleware.api_logger_middleware.APILoggerMiddleware',
 ]
 
-ROOT_URLCONF = 'config.urls'
+ROOT_URLCONF = 'configs.urls'
 
 DRF_API_LOGGER_DATABASE = True
 DRF_LOGGER_QUEUE_MAX_SIZE = 50
@@ -47,7 +41,7 @@ DRF_API_LOGGER_EXCLUDE_KEYS = ['password', 'token']
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['apps.templates'],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -55,24 +49,22 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'config.wsgi.application'
+WSGI_APPLICATION = 'configs.wsgi.application'
 
 REST_FRAMEWORK = {
-
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
     ],
-    'DEFAULT_PARSER_CLASSES': [ 'rest_framework.parsers.JSONParser', 
-                        
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 15,
@@ -84,23 +76,23 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': '',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.IsAdminUser'],
+    'SERVE_AUTHENTICATION': ['rest_framework.authentication.SessionAuthentication',
+                             'rest_framework.authentication.BasicAuthentication']
 }
 
-
 DATABASES = {
-    
-    "default":{
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "django",
-        "USER": "django",
-        "PASSWORD": "8995",
-        "HOST": "127.0.0.1",
-        "PORT": "5432",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'django',
+        'USER': 'django',
+        'PASSWORD': '8995',
+        'HOST': 'psg',
+        'PORT': 5432,
     }
 }
 
-
-ARDUINO_URL  = 'localhost:1203/{}'
+ARDUINO_URL = 'localhost:1203/{}'
 
 SIMPLE_JWT = {
     "SLIDING_TOKEN_LIFETIME": timedelta(days=30),
@@ -127,21 +119,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'Europe/Moscow'
-
 USE_I18N = True
-
 USE_TZ = True
-
 
 STATIC_URL = 'static/'
 
 MEDIA_ROOT = BASE_DIR / 'media'
-
 MEDIA_URL = 'media/'
-
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
