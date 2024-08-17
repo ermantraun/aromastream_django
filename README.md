@@ -126,6 +126,14 @@ docker  run -it --name django -p 80:80 --network aromastream aromastream_django<
     <li><b>DRF_API_LOGGER_EXCLUDE_KEYS:</b> ['password', 'token'] — ключи, которые будут исключены из логов.</li>
 </ul>
 
+### Настройка CORS
+
+<ul>
+    <li><b>CORS_ALLOWED_ORIGINS:</b> Не используется — Список источников, которым разрешено выполнять межсайтовые HTTP-запросы</li>
+    <li><b>CORS_ALLOW_ALL_ORIGINS:</b> True — Если True, то будут разрешены все источники.</li>
+</ul>
+
+
 ### Дополнительные настройки
 
 <ul>
