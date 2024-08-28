@@ -57,16 +57,22 @@
 
 <ol>
     <li><b>Создайте Docker-образ и запустите контейнер:</b>
-    <pre><code>docker build -t aromastream_django .
-docker  run -it --name django -p 80:80 --network aromastream aromastream_django</code></pre>
-   
-   Это запустит контейнер с вашим приложением. Порт 8000 будет использоваться для веб-сервиса Django
+        <pre><code>docker build -t aromastream_django .
+docker run -it --name django -p 80:80 --network aromastream aromastream_django bash</code></pre>
+        Это запустит контейнер с вашим приложением. Порт 80 будет использоваться для веб-сервиса Django через Nginx и uWSGI.
     </li>
-    <li><b>Запустите веб-приложение:</b>
-    <pre><code>python manage.py migrate</code></pre>
-    <pre><code>python manage.py runserver 0.0.0.0:80</code></pre>
+    <li><b>Примените миграции</b>
+        <pre><code>python manage.py migrate</code></pre>
+    </li>
+    <li><b>Запустите Nginx и uWSGI:</b>
+        <p>Внутри контейнера выполните следующие команды для запуска Nginx и uWSGI:</p>
+        <pre><code>service nginx start</code></pre>
+        <pre><code>uwsgi --ini configs/uwsgi.ini</code></pre>
+        <p>Эти команды запустят Nginx как веб-сервер и uWSGI для обработки запросов к вашему приложению Django.</p>
     </li>
 </ol>
+
+
 
 
 
