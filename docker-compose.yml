@@ -1,0 +1,34 @@
+services:
+  django:
+    build: .
+    image: aromastream_django
+    container_name: django
+    command: > 
+      sh -c "python manage.py makemigrations && \
+        python manage.py migrate && \
+        service nginx start && \
+        uwsgi --ini configs/uwsgi.ini"
+    networks:
+      - aromastream
+    ports:
+      - 80:80
+    depends_on:
+      - psg
+  psg:
+    build:
+      context: ./db_dockerfile
+      dockerfile: Dockerfile
+    image: postgres
+    container_name: psg
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - 5432:5432
+    networks:
+      - aromastream
+
+networks:
+  aromastream:
+
+volumes:
+  postgres_data:

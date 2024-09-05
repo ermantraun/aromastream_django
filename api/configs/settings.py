@@ -48,6 +48,7 @@ DRF_API_LOGGER_EXCLUDE_KEYS = ['password', 'token']
 """
 
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 
 
 TEMPLATES = [
