@@ -68,8 +68,8 @@ class VideoSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Video
-        extra_kwargs = {'file': {'validators': [FileExtensionValidator(allowed_extensions=['mp4'])]}, 'views': {'read_only': True}}
-        exclude = ['id', 'created_at', 'updated_at']
+        extra_kwargs = {'file': {'validators': [FileExtensionValidator(allowed_extensions=['mp4'])]}, 'views': {'read_only': True}, 'id': {'read_only': True}}
+        exclude = ['created_at', 'updated_at']
     def create(self, validated_data):
         video = Video.objects.create(**validated_data)
         

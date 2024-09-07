@@ -127,6 +127,7 @@ class UserPasswordUpdateConfirmView(APIView):
 
 class TimeStampListView(APIView, PageNumberPagination):
     permission_classes = [permissions.IsAuthenticated]
+    page_size_query_param = 'page_size'
 
     @extend_schema(
         request=None, 
@@ -176,6 +177,7 @@ class TimeStampCreateView(APIView):
 class VideoListView(APIView, PageNumberPagination):
     parser_classes = [FormParser, MultiPartParser]
     permission_classes = [IsAdminUserOrAuthenticated]
+    page_size_query_param = 'page_size'
 
     @extend_schema(
         request=None, 
@@ -231,6 +233,7 @@ class VideoDetailView(APIView):
 
 class PopularVideoListView(APIView, PageNumberPagination):
     permission_classes = [permissions.IsAuthenticated]
+    page_size_query_param = 'page_size'
 
     @extend_schema(
         request=None, 
@@ -246,6 +249,7 @@ class PopularVideoListView(APIView, PageNumberPagination):
 
 class SearchVideoListView(APIView, PageNumberPagination):
     permission_classes = [permissions.IsAuthenticated]
+    page_size_query_param = 'page_size'
 
     @extend_schema(
         parameters=[OpenApiParameter(name='query', description='Search video list', type=OpenApiTypes.STR, location=OpenApiParameter.QUERY)],
