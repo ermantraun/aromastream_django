@@ -54,7 +54,8 @@ class PasswordUpdateConfirmSerializer(serializers.Serializer):
 class TimeStampSerializer(serializers.ModelSerializer):
     class Meta:
         model = TimeStamp
-        exclude = ['id', 'created_at']
+        exclude = ['created_at']
+        read_only_fields = ('id',)
         
     
     def create(self, validated_data):

@@ -281,7 +281,7 @@ class TriggerListView(APIView):
     def post(self, request):
         serializer = TriggerSerializer(data=request.data)
         if serializer.is_valid():
-            aroma = serializer.validated_data['timestamp']['aroma']
+            aroma = serializer.validated_data['timestamp'].aroma
             arduino_url = settings.ARDUINO_URL.format(aroma)
             response = requests.get(arduino_url)
             if response.status_code == 200:
