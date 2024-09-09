@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Video, TimeStamp, ChangeRequest
+from .models import Video, TimeStamp, ChangeRequest, Subscription
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -26,6 +26,17 @@ class ChangeRequestAdmin(admin.ModelAdmin):
     list_display = ('id', 'get_user_username', 'field', 'created_at')
     search_fields = ('user__username', 'field')
     list_filter = ('created_at',)
+
+    def get_user_username(self, obj):
+        return obj.user.username
+    get_user_username.admin_order_field = 'user'  # Allows column to be sortable
+    get_user_username.short_description = 'User'
+    
+    
+@admin.register(Subscription)
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'active')
+    search_fields = ('user', 'active')
 
     def get_user_username(self, obj):
         return obj.user.username

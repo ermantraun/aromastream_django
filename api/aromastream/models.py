@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from datetime import timedelta
 from django.utils import timezone
 from django.core.validators import FileExtensionValidator
+
 def upload_file_path(instance, file_name):
     ext = file_name.split('.')[-1]
     date = datetime.now()
@@ -51,3 +52,8 @@ class ChangeRequest(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.field} - {self.created_at}"
 
+class Subscription(models.Model):
+    user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name='subscription')
+    active = models.BooleanField(default=False, blank=True)
+    
+    
